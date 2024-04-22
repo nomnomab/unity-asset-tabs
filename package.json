@@ -1,10 +1,11 @@
 {
   "name": "com.nomnom.asset-tabs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Asset Tabs",
   "description": "This package allows for you to easily make docked tabs for your assets",
   "unity": "2022.3",
   "unityRelease": "9f1",
+  "documentationUrl": "https://github.com/nomnomab/unity-asset-tabs",
   "licensesUrl": "https://choosealicense.com/licenses/mit/",
   "dependencies": {},
   "devDependencies": {},
@@ -12,7 +13,7 @@
   "author": {
     "name": "Andrew Burke",
     "email": "",
-    "url": ""
+    "url": "https://github.com/nomnomab"
   },
   "type": "library"
 }

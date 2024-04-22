@@ -16,6 +16,8 @@ namespace Nomnom.AssetTabs {
 
         private readonly List<VisualElement> _elements = new();
         private ScrollView _scrollView;
+        private Image _selectionIcon;
+        private Label _selectionName;
         
         public static FolderTabWindow Create(Object folder, EditorWindow dockTo) {
             var window = CreateWindow<FolderTabWindow>(new Type[] { dockTo.GetType() });
@@ -37,6 +39,8 @@ namespace Nomnom.AssetTabs {
         public void Refresh() {
             _elements.Clear();
             _scrollView = null;
+            _selectionIcon = null;
+            _selectionName = null;
             
             if (_folderAsset == null) return;
 
@@ -165,6 +169,20 @@ namespace Nomnom.AssetTabs {
                 name = "folder-tab--footer"
             };
 
+            var selectionIcon = new Image {
+                name = "folder-tab--selection-icon",
+            };
+            footer.Add(selectionIcon);
+            _selectionIcon = selectionIcon;
+            
+            var selectionLabel = new Label {
+                name = "folder-tab--selection-label",
+            };
+            footer.Add(selectionLabel);
+            _selectionName = selectionLabel;
+            
+            SetSelection(null);
+
             var scaleSlider = new Slider {
                 name = "folder-tab--scale-slider",
             };
@@ -182,6 +200,17 @@ namespace Nomnom.AssetTabs {
                 obj.ApplyModifiedPropertiesWithoutUndo();
 
                 updateSize();
+            });
+            
+            scaleSlider.RegisterCallback<MouseUpEvent>(e => {
+                if (e.button == 1) {
+                    var menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("Reset Zoom"), false, () => {
+                        scaleSlider.value = 84;
+                    });
+                    menu.ShowAsContext();
+                    e.StopPropagation();
+                }
             });
             
             scaleSlider.value = _zoomLevel;
@@ -325,6 +354,11 @@ namespace Nomnom.AssetTabs {
             
             button.RegisterCallback<FocusInEvent>(e => {
                 _scrollView?.ScrollTo(button);
+                SetSelection(childAsset);
+            });
+            
+            button.RegisterCallback<FocusOutEvent>(e => {
+                SetSelection(null);
             });
             
             button.AddManipulator(new KeyboardNavigationManipulator((op, e) => {
@@ -431,6 +465,20 @@ namespace Nomnom.AssetTabs {
             });
             
             parent.Add(button);
+        }
+
+        private void SetSelection(Object obj) {
+            if (_selectionIcon == null || _selectionName == null) return;
+            if (!obj) {
+                _selectionIcon.style.display = DisplayStyle.None;
+                _selectionName.style.display = DisplayStyle.None;
+                return;
+            }
+            
+            _selectionIcon.style.display = DisplayStyle.Flex;
+            _selectionName.style.display = DisplayStyle.Flex;
+            _selectionIcon.image = AssetPreview.GetMiniThumbnail(obj);
+            _selectionName.text = AssetDatabase.GetAssetPath(obj);
         }
     }
 }
