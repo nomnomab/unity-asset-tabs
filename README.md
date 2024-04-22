@@ -8,7 +8,6 @@ https://github.com/nomnomab/asset-tabs/assets/28305689/f9f3c806-26fd-442c-80b2-5
 - [Install](#install)
     - [via Package Manager](#via-package-manager)
     - [via Git URL](#via-git-url)
-- [Configuration](#configuration)
 
 <!-- toc -->
 
