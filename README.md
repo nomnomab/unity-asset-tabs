@@ -17,7 +17,7 @@ https://github.com/nomnomab/asset-tabs/assets/28305689/f9f3c806-26fd-442c-80b2-5
 There are many ways to use this:
 
 - Right click an asset and select `Open as Tab` to open a new tab in the focused window.
-- Drag an asset into the tab row of any window to dock it
+- Drag an asset, or a scene object, into the tab row of any window to dock it
 - Drag an asset from a folder tab into the tab row to dock it
 
 ## Install
