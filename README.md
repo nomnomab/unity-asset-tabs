@@ -38,6 +38,6 @@ There are many ways to use this:
 {
   "dependencies": {
     "com.nomnom.asset-tabs": "https://github.com/nomnomab/unity-asset-tabs.git"
-  }~~~~
+  }
 }
 ```
