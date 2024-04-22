@@ -2,6 +2,8 @@
 
 This package allows for you to easily make docked tabs for your assets. Simply drag the object into an EditorWindow's tab row, and voila!
 
+https://github.com/nomnomab/asset-tabs/assets/28305689/f9f3c806-26fd-442c-80b2-5587e983d6a7
+
 - [How to use](#how-to-use)
 - [Install](#install)
     - [via Package Manager](#via-package-manager)
