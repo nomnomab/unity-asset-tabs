@@ -1,4 +1,4 @@
-# Asset Tabs
+# Unity Asset Tabs
 
 This package allows for you to easily make docked tabs for your assets. Simply drag the object into an EditorWindow's tab row, and voila!
 
@@ -26,7 +26,7 @@ There are many ways to use this:
 1. Open the package manager from `Window > Package Manager`
 2. Click the plus at the top left of the window
 3. Select `Add package from git URL...`
-4. Paste in `https://github.com/nomnomab/asset-tabs.git`
+4. Paste in `https://github.com/nomnomab/unity-asset-tabs.git`
 5. Press the add button, or press enter
 
 ### via Git URL
@@ -37,7 +37,7 @@ There are many ways to use this:
 ```json
 {
   "dependencies": {
-    "com.nomnom.asset-tabs": "https://github.com/nomnomab/asset-tabs.git"
-  }
+    "com.nomnom.asset-tabs": "https://github.com/nomnomab/unity-asset-tabs.git"
+  }~~~~
 }
 ```
