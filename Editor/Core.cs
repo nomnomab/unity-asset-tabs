@@ -16,13 +16,24 @@ namespace Nomnom.AssetTabs {
             EditorApplication.update += OnUpdate;
         }
         
-        [MenuItem("Assets/Open as Tab", false, priority: Int32.MaxValue)]
+        [MenuItem("Assets/Open as Tab", false, priority: 500)]
         private static void Open() {
             OpenAssetAsTab(Selection.activeObject);
         }
         
         [MenuItem("Assets/Open as Tab", true)]
         private static bool OpenValidate() {
+            return Selection.activeObject;
+        }
+        
+        [MenuItem("Assets/Open as Floating", false, priority: 501)]
+        private static void OpenFloating() {
+            OpenAssetAsFloating(Selection.activeObject);
+        }
+        
+        [MenuItem("Assets/Open as Floating", true)]
+        private static bool OpenFloatingValidate() {
+            // return Selection.activeObject && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(Selection.activeObject));
             return Selection.activeObject;
         }
 
@@ -143,6 +154,21 @@ namespace Nomnom.AssetTabs {
                 ReflectionUtility.ScrollToNewTab(dockArea, null);
             };
             
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+        
+        public static void OpenAssetAsFloating(Object obj) {
+            var assetPath = AssetDatabase.GetAssetPath(obj);
+            if (AssetDatabase.IsValidFolder(assetPath)) {
+                EditorApplication.delayCall += () => {
+                    FolderTabWindow.Create(obj, null);
+                };
+                
+                EditorApplication.QueuePlayerLoopUpdate();
+                return;
+            }
+            
+            ReflectionUtility.OpenPropertyEditor(obj, true);
             EditorApplication.QueuePlayerLoopUpdate();
         }
     }

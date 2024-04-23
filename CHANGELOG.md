@@ -1,4 +1,10 @@
-﻿## 1.0.2
+﻿## 1.0.3
+
+- Added a `Open as Floating` context option to menus.
+  - Allows you to "pop out " the window instead of having it always dock first
+  - Using this instead of the `Properties` option will let you get a floating folder tab
+
+## 1.0.2
 
 - Tweaked more styling so asset labels have a nicer blue highlight
 

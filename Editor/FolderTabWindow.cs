@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -20,8 +18,8 @@ namespace Nomnom.AssetTabs {
         private Image _selectionIcon;
         private Label _selectionName;
         
-        public static FolderTabWindow Create(Object folder, EditorWindow dockTo) {
-            var window = CreateWindow<FolderTabWindow>(new Type[] { dockTo.GetType() });
+        public static FolderTabWindow Create(Object folder, EditorWindow? dockTo) {
+            var window = dockTo != null ? CreateWindow<FolderTabWindow>(dockTo.GetType()) : CreateWindow<FolderTabWindow>();
             window._folderAsset = folder;
             window.titleContent = new GUIContent(folder.name, AssetPreview.GetMiniThumbnail(folder));
             window.Show();
@@ -97,6 +95,7 @@ namespace Nomnom.AssetTabs {
                         var menu = new GenericMenu();
                         menu.AddItem(new GUIContent("Open"), false, openBreadcrumb);
                         menu.AddItem(new GUIContent("Open as Tab"), false, openBreadcrumbAsTab);
+                        menu.AddItem(new GUIContent("Open as Floating"), false, openBreadcrumbAsFloating);
                         menu.ShowAsContext();
                         e.StopPropagation();
                     }
@@ -112,6 +111,12 @@ namespace Nomnom.AssetTabs {
                     var path = string.Join("/", splitPath.Take(tmpI + 1));
                     var folderAsset = AssetDatabase.LoadMainAssetAtPath(path);
                     Core.OpenAssetAsTab(folderAsset);
+                }
+                
+                void openBreadcrumbAsFloating() {
+                    var path = string.Join("/", splitPath.Take(tmpI + 1));
+                    var folderAsset = AssetDatabase.LoadMainAssetAtPath(path);
+                    Core.OpenAssetAsFloating(folderAsset);
                 }
                 
                 inner.Add(breadcrumb);
@@ -345,6 +350,7 @@ namespace Nomnom.AssetTabs {
                         menu.AddItem(new GUIContent("Focus"), false, () => Core.FocusAsset(childAsset));
                         menu.AddItem(new GUIContent("Open"), false, () => Core.OpenAsset(childAsset));
                         menu.AddItem(new GUIContent("Open as Tab"), false, () => Core.OpenAssetAsTab(childAsset));
+                        menu.AddItem(new GUIContent("Open as Floating"), false, () => Core.OpenAssetAsFloating(childAsset));
                         menu.ShowAsContext();
                         e.StopPropagation();
                     }
