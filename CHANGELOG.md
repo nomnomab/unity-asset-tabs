@@ -3,9 +3,9 @@
 - Can now drag assets into a folder tab to move it
 - Can now drag scene objects into a folder tab to create a new prefab
 - Added menu option `Delete` to delete an asset, while in a folder tab
-  - Added hotkey: `Ctrl+D`
-- Added menu option `Duplicate` to duplicate an asset, while in a folder tab
   - Added hotkey: `Delete` or `X`
+- Added menu option `Duplicate` to duplicate an asset, while in a folder tab
+  - Added hotkey: `Ctrl+D`
 
 ## 1.0.3
 
