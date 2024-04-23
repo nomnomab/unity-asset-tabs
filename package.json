@@ -1,6 +1,6 @@
 {
   "name": "com.nomnom.asset-tabs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "displayName": "Asset Tabs",
   "description": "This package allows for you to easily make docked tabs for your assets",
   "unity": "2022.3",

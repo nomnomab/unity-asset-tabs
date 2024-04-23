@@ -1,4 +1,8 @@
-﻿## 1.0.1
+﻿## 1.0.2
+
+- Tweaked more styling so asset labels have a nicer blue highlight
+
+## 1.0.1
 
 - Tweaked padding with list view in folder tab
 - Added selection text & icon in footer of folder tab

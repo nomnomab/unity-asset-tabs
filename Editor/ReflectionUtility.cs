@@ -8,11 +8,14 @@ using Object = System.Object;
 namespace Nomnom.AssetTabs {
     internal static class ReflectionUtility {
         // mmmm reflection
+        public static GUIStyle toolbarCreateAddNewDropDownStyle => (GUIStyle)toolbarCreateAddNewDropDownStyleProperty.GetValue(null);
+        private static PropertyInfo toolbarCreateAddNewDropDownStyleProperty = typeof(EditorStyles).GetProperty("toolbarCreateAddNewDropDown", BindingFlags.Static | BindingFlags.NonPublic)!;
+        
         private static readonly Type _editorType = typeof(Editor);
         private static readonly Type _dockAreaType = _editorType.Assembly.GetType("UnityEditor.DockArea");
         private static readonly Type _propertyEditorType = _editorType.Assembly.GetType("UnityEditor.PropertyEditor");
         
-        private static readonly MethodInfo _getCurrentMousePositionMethod = _editorType.GetMethod("GetCurrentMousePosition", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo _getCurrentMousePositionMethod = _editorType.GetMethod("GetCurrentMousePosition", BindingFlags.NonPublic | BindingFlags.Static)!;
         
         private static readonly MethodInfo _openPropertyEditorMethod = _propertyEditorType.GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
             .First(x => x.Name == "OpenPropertyEditor" && x.GetParameters().Length == 2);
@@ -20,11 +23,11 @@ namespace Nomnom.AssetTabs {
         private static readonly MethodInfo _addTabMethod = _dockAreaType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
             .First(x => x.Name == "AddTab" && x.GetParameters().Length == 2 && x.GetParameters()[0].ParameterType == typeof(EditorWindow));
         
-        private static readonly FieldInfo _getEditorWindowParentField = typeof(EditorWindow).GetField("m_Parent", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo _getEditorWindowParentField = typeof(EditorWindow).GetField("m_Parent", BindingFlags.NonPublic | BindingFlags.Instance)!;
         
-        private static readonly FieldInfo _dockScrollOffsetField = _dockAreaType.GetField("m_ScrollOffset", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo _dockTotalTabWidthField = _dockAreaType.GetField("m_TotalTabWidth", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo _dockTabAreaRectField = _dockAreaType.GetField("m_TabAreaRect", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo _dockScrollOffsetField = _dockAreaType.GetField("m_ScrollOffset", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        private static readonly FieldInfo _dockTotalTabWidthField = _dockAreaType.GetField("m_TotalTabWidth", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        private static readonly FieldInfo _dockTabAreaRectField = _dockAreaType.GetField("m_TabAreaRect", BindingFlags.NonPublic | BindingFlags.Instance)!;
 
         internal static Vector2 GetCurrentMousePosition() {
             return (Vector2)_getCurrentMousePositionMethod.Invoke(null, null);

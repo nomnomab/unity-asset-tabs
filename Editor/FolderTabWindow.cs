@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -138,6 +139,18 @@ namespace Nomnom.AssetTabs {
                 _scrollValue = e.newValue;
                 obj.ApplyModifiedPropertiesWithoutUndo();
             });
+            
+            // gridScroller.RegisterCallback<MouseUpEvent>(e => {
+            //     if (e.button != 1) return;
+            //     
+            //     var r = GUILayoutUtility.GetRect(EditorGUIUtility.IconContent("CreateAddNew"), ReflectionUtility.toolbarCreateAddNewDropDownStyle);
+            //     r.position = e.mousePosition;
+            //     
+            //     Selection.activeObject = _folderAsset;
+            //     EditorUtility.DisplayPopupMenu(r, "Assets", new MenuCommand(_folderAsset));
+            //     
+            //     e.StopPropagation();
+            // });
             
             _scrollView = gridScroller;
             root.Add(gridScroller);
