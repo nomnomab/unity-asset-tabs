@@ -1,4 +1,13 @@
-﻿## 1.0.3
+﻿## 1.0.4
+
+- Can now drag assets into a folder tab to move it
+- Can now drag scene objects into a folder tab to create a new prefab
+- Added menu option `Delete` to delete an asset, while in a folder tab
+  - Added hotkey: `Ctrl+D`
+- Added menu option `Duplicate` to duplicate an asset, while in a folder tab
+  - Added hotkey: `Delete` or `X`
+
+## 1.0.3
 
 - Added a `Open as Floating` context option to menus.
   - Allows you to "pop out " the window instead of having it always dock first

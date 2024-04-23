@@ -165,6 +165,72 @@ namespace Nomnom.AssetTabs {
             };
             gridScroller.Add(grid);
             grid.EnableInClassList("list-view", false);
+            
+            _scrollView.RegisterCallback<DragUpdatedEvent>(e => {
+                var refs = DragAndDrop.objectReferences;
+                if (refs == null || refs.Length == 0) return;
+                
+                DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+                e.StopPropagation();
+            });
+            
+            _scrollView.RegisterCallback<DragPerformEvent>(e => {
+                var refs = DragAndDrop.objectReferences;
+                if (refs == null || refs.Length == 0) return;
+
+                var folderPath = AssetDatabase.GetAssetPath(_folderAsset);
+                
+                foreach (var obj in refs) {
+                    if (AssetDatabase.Contains(obj)) {
+                        // move the asset
+                        var assetPath = AssetDatabase.GetAssetPath(obj);
+                        AssetDatabase.MoveAsset(assetPath, folderPath + "/" + Path.GetFileName(assetPath));
+                        AssetDatabase.Refresh();
+                        continue;
+                    }
+
+                    if (obj is GameObject gameObject) {
+                        // is this already connected to a prefab?
+                        if (PrefabUtility.GetPrefabAssetType(gameObject) != PrefabAssetType.NotAPrefab) {
+                            var variantName = $"{gameObject.name} Variant";
+                            var assetPath = $"{folderPath}/{variantName}";
+                            
+                            // get the next available number
+                            var existingVariants = AssetDatabase.FindAssets($"t:GameObject {variantName}", new[] { folderPath })
+                                .Select(AssetDatabase.GUIDToAssetPath)
+                                .Select(path => Path.GetFileNameWithoutExtension(path))
+                                .Select(name => int.TryParse(name.Substring(variantName.Length).Trim(), out var num) ? num : 0)
+                                .OrderBy(num => num)
+                                .ToList();
+                            
+                            if (existingVariants.Count > 0) {
+                                assetPath += $" {existingVariants.Last() + 1}.prefab";
+                            } else {
+                                assetPath += ".prefab";
+                            }
+                            
+                            // check if asset path exists already
+                            if (AssetDatabase.AssetPathToGUID(assetPath) != string.Empty) {
+                                Debug.LogWarning($"Asset already exists at path: {assetPath}");
+                                continue;
+                            }
+                            
+                            PrefabUtility.SaveAsPrefabAssetAndConnect(gameObject, assetPath, InteractionMode.UserAction);
+                            AssetDatabase.Refresh();
+                            continue;
+                        }
+
+                        {
+                            var assetPath = $"{folderPath}/{gameObject.name}.prefab";
+                            PrefabUtility.SaveAsPrefabAssetAndConnect(gameObject, assetPath, InteractionMode.UserAction);
+                            AssetDatabase.Refresh();
+                        }
+                        continue;
+                    }
+                }
+                
+                e.StopPropagation();
+            });
 
             // gather all assets in the folder
             var childFolders = Directory.GetDirectories(assetPath)
@@ -348,9 +414,13 @@ namespace Nomnom.AssetTabs {
                     if (e.button == 1) {
                         var menu = new GenericMenu();
                         menu.AddItem(new GUIContent("Focus"), false, () => Core.FocusAsset(childAsset));
+                        menu.AddSeparator(string.Empty);
                         menu.AddItem(new GUIContent("Open"), false, () => Core.OpenAsset(childAsset));
                         menu.AddItem(new GUIContent("Open as Tab"), false, () => Core.OpenAssetAsTab(childAsset));
                         menu.AddItem(new GUIContent("Open as Floating"), false, () => Core.OpenAssetAsFloating(childAsset));
+                        menu.AddSeparator(string.Empty);
+                        menu.AddItem(new GUIContent("Duplicate %D"), false, () => Core.DuplicateAsset(childAsset, this));
+                        menu.AddItem(new GUIContent("Delete _DEL"), false, () => Core.DestroyAsset(childAsset, this));
                         menu.ShowAsContext();
                         e.StopPropagation();
                     }
@@ -378,6 +448,20 @@ namespace Nomnom.AssetTabs {
             
             button.RegisterCallback<FocusOutEvent>(e => {
                 SetSelection(null);
+            });
+            
+            button.RegisterCallback<KeyUpEvent>(e => {
+                if (e.ctrlKey && e.keyCode == KeyCode.D) {
+                    Core.DuplicateAsset(childAsset, this);
+                    e.StopPropagation();
+                    return;
+                }
+                
+                if (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.X) {
+                    Core.DestroyAsset(childAsset, this);
+                    e.StopPropagation();
+                    return;
+                }
             });
             
             button.AddManipulator(new KeyboardNavigationManipulator((op, e) => {

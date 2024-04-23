@@ -9,28 +9,28 @@ namespace Nomnom.AssetTabs {
     internal static class Core {
         // todo: make sure this doesn't get any weird edge case for caching
         private static EditorWindow _lastWindow;
-        
+
         [InitializeOnLoadMethod]
         private static void OnLoad() {
             EditorApplication.update -= OnUpdate;
             EditorApplication.update += OnUpdate;
         }
-        
+
         [MenuItem("Assets/Open as Tab", false, priority: 500)]
         private static void Open() {
             OpenAssetAsTab(Selection.activeObject);
         }
-        
+
         [MenuItem("Assets/Open as Tab", true)]
         private static bool OpenValidate() {
             return Selection.activeObject;
         }
-        
+
         [MenuItem("Assets/Open as Floating", false, priority: 501)]
         private static void OpenFloating() {
             OpenAssetAsFloating(Selection.activeObject);
         }
-        
+
         [MenuItem("Assets/Open as Floating", true)]
         private static bool OpenFloatingValidate() {
             // return Selection.activeObject && AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(Selection.activeObject));
@@ -41,7 +41,7 @@ namespace Nomnom.AssetTabs {
             if (DragAndDrop.objectReferences == null || DragAndDrop.objectReferences.Length <= 0) {
                 return;
             }
-            
+
             // are we dragging into a tab row
             var hoveringWindow = EditorWindow.mouseOverWindow;
             if (!hoveringWindow) {
@@ -58,7 +58,7 @@ namespace Nomnom.AssetTabs {
                     var dockArea = _lastWindow.rootVisualElement.parent?.Children().First();
                     dockArea?.UnregisterCallback<DragPerformEvent>(OnDragPerform);
                 }
-                    
+
                 _lastWindow = hoveringWindow;
                 {
                     var dockArea = _lastWindow.rootVisualElement.parent?.Children().First();
@@ -83,9 +83,9 @@ namespace Nomnom.AssetTabs {
             if (DragAndDrop.GetGenericData("valid-asset-tab") == null) {
                 return;
             }
-            
+
             var dockArea = ReflectionUtility.GetEditorWindowParent(_lastWindow);
-            
+
             EditorApplication.delayCall += () => {
                 for (int i = 0; i < dragObjects.Length; i++) {
                     var assetPath = AssetDatabase.GetAssetPath(dragObjects[i]);
@@ -93,7 +93,7 @@ namespace Nomnom.AssetTabs {
                         FolderTabWindow.Create(dragObjects[i], _lastWindow);
                         continue;
                     }
-                    
+
                     var e = ReflectionUtility.OpenPropertyEditor(dragObjects[i]);
                     ReflectionUtility.DockAddTab(dockArea, e);
                 }
@@ -109,7 +109,7 @@ namespace Nomnom.AssetTabs {
             };
 
             _lastWindow = null;
-            
+
             evt.StopImmediatePropagation();
             evt.StopPropagation();
         }
@@ -124,7 +124,7 @@ namespace Nomnom.AssetTabs {
                 EditorApplication.QueuePlayerLoopUpdate();
                 return;
             }
-                
+
             EditorGUIUtility.PingObject(obj);
             EditorApplication.QueuePlayerLoopUpdate();
         }
@@ -133,7 +133,7 @@ namespace Nomnom.AssetTabs {
             FocusAsset(obj);
             AssetDatabase.OpenAsset(obj);
         }
-        
+
         public static void OpenAssetAsTab(Object obj) {
             var currentWindow = EditorWindow.mouseOverWindow;
             var dockArea = ReflectionUtility.GetEditorWindowParent(currentWindow);
@@ -143,33 +143,50 @@ namespace Nomnom.AssetTabs {
                 EditorApplication.delayCall += () => {
                     FolderTabWindow.Create(obj, currentWindow);
                 };
-                
+
                 EditorApplication.QueuePlayerLoopUpdate();
                 return;
             }
-                
+
             var propertyEditor = ReflectionUtility.OpenPropertyEditor(obj);
             EditorApplication.delayCall += () => {
                 ReflectionUtility.DockAddTab(dockArea, propertyEditor);
                 ReflectionUtility.ScrollToNewTab(dockArea, null);
             };
-            
+
             EditorApplication.QueuePlayerLoopUpdate();
         }
-        
+
         public static void OpenAssetAsFloating(Object obj) {
             var assetPath = AssetDatabase.GetAssetPath(obj);
             if (AssetDatabase.IsValidFolder(assetPath)) {
                 EditorApplication.delayCall += () => {
                     FolderTabWindow.Create(obj, null);
                 };
-                
+
                 EditorApplication.QueuePlayerLoopUpdate();
                 return;
             }
-            
+
             ReflectionUtility.OpenPropertyEditor(obj, true);
             EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        public static void DuplicateAsset(Object obj, FolderTabWindow window) {
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = obj;
+            if (EditorApplication.ExecuteMenuItem("Edit/Duplicate")) {
+                EditorApplication.delayCall += () => window.Refresh();
+            }
+            EditorApplication.delayCall += () => window.Focus();
+        }
+
+        public static void DestroyAsset(Object obj, FolderTabWindow window) {
+            Selection.activeObject = obj;
+            if (EditorApplication.ExecuteMenuItem("Assets/Delete")) {
+                EditorApplication.delayCall += () => window.Refresh();
+            }
+            EditorApplication.delayCall += () => window.Focus();
         }
     }
 }
