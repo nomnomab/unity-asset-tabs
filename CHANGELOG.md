@@ -1,4 +1,10 @@
-﻿## 1.0.4
+﻿## 1.0.5
+
+- Fixed issue where dragging past a tab row would register the drag as always succeeding, 
+even when outside the allowed drag area.
+- Fixed issue where the SceneView wouldn't accept drag events
+
+## 1.0.4
 
 - Can now drag assets into a folder tab to move it
 - Can now drag scene objects into a folder tab to create a new prefab

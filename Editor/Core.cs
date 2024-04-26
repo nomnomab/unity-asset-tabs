@@ -39,6 +39,10 @@ namespace Nomnom.AssetTabs {
 
         private static void OnUpdate() {
             if (DragAndDrop.objectReferences == null || DragAndDrop.objectReferences.Length <= 0) {
+                if (_lastWindow) {
+                    UnRegisterEnterDrag(_lastWindow);
+                    _lastWindow = null;
+                }
                 return;
             }
 
@@ -46,8 +50,7 @@ namespace Nomnom.AssetTabs {
             var hoveringWindow = EditorWindow.mouseOverWindow;
             if (!hoveringWindow) {
                 if (_lastWindow) {
-                    var dockArea = _lastWindow.rootVisualElement.parent?.Children().First();
-                    dockArea?.UnregisterCallback<DragPerformEvent>(OnDragPerform);
+                    UnRegisterEnterDrag(_lastWindow);
                 }
                 _lastWindow = null;
                 return;
@@ -55,42 +58,107 @@ namespace Nomnom.AssetTabs {
 
             if (!_lastWindow || _lastWindow != hoveringWindow) {
                 if (_lastWindow) {
-                    var dockArea = _lastWindow.rootVisualElement.parent?.Children().First();
-                    dockArea?.UnregisterCallback<DragPerformEvent>(OnDragPerform);
+                    UnRegisterEnterDrag(_lastWindow);
                 }
 
                 _lastWindow = hoveringWindow;
-                {
-                    var dockArea = _lastWindow.rootVisualElement.parent?.Children().First();
-                    dockArea?.UnregisterCallback<DragPerformEvent>(OnDragPerform);
-                    dockArea?.RegisterCallback<DragPerformEvent>(OnDragPerform);
-                }
+                RegisterEnterDrag(hoveringWindow);
             }
+
+            // Debug.Log($"{_lastWindow} vs {hoveringWindow}");
 
             var tabRect = hoveringWindow.position;
             tabRect.height = 30;
 
             var mousePosition = ReflectionUtility.GetCurrentMousePosition();
             if (tabRect.Contains(mousePosition)) {
-                DragAndDrop.SetGenericData("valid-asset-tab", true);
                 DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
             }
         }
 
-        private static void OnDragPerform(DragPerformEvent evt) {
-            var dragObjects = DragAndDrop.objectReferences;
-            if (dragObjects.Length == 0) return;
-            if (DragAndDrop.GetGenericData("valid-asset-tab") == null) {
+        private static void RegisterEnterDrag(EditorWindow editorWindow) {
+            if (!editorWindow) return;
+            if (editorWindow is SceneView) {
+                RegisterSceneViewEnterDrag(editorWindow);
                 return;
             }
+            
+            var dockArea = editorWindow.rootVisualElement.parent?.Children().First();
+            // Debug.Log($"dockArea enter: {dockArea}");
+            dockArea?.UnregisterCallback<DragPerformEvent>(OnDragPerform);
+            dockArea?.RegisterCallback<DragPerformEvent>(OnDragPerform);
+        }
 
-            var dockArea = ReflectionUtility.GetEditorWindowParent(_lastWindow);
+        private static void UnRegisterEnterDrag(EditorWindow editorWindow) {
+            if (!editorWindow) return;
+            if (editorWindow is SceneView) {
+                UnRegisterSceneViewEnterDrag(editorWindow);
+                return;
+            }
+            
+            var dockArea = editorWindow.rootVisualElement.parent?.Children().First();
+            // Debug.Log($"dockArea exit: {dockArea}");
+            dockArea?.UnregisterCallback<DragPerformEvent>(OnDragPerform);
+        }
+        
+        private static void RegisterSceneViewEnterDrag(EditorWindow editorWindow) {
+            var sceneView = editorWindow as SceneView;
+            if (!sceneView) return;
+            
+            SceneView.duringSceneGui -= OnSceneGUI;
+            SceneView.duringSceneGui += OnSceneGUI;
+        }
+        
+        private static void UnRegisterSceneViewEnterDrag(EditorWindow editorWindow) {
+            var sceneView = editorWindow as SceneView;
+            if (!sceneView) return;
+            
+            SceneView.duringSceneGui -= OnSceneGUI;
+        }
+
+        private static void OnSceneGUI(SceneView sceneView) {
+            if (!_lastWindow) {
+                SceneView.duringSceneGui -= OnSceneGUI;
+                return;
+            }
+            
+            var e = Event.current;
+            if (e.type == EventType.DragExited) {
+                OnDragPerform(default);
+                e.Use();
+            }
+        }
+
+        private static void OnDragPerform(DragPerformEvent evt) {
+            UnRegisterEnterDrag(_lastWindow);
+            _lastWindow = null;
+            
+            var dragObjects = DragAndDrop.objectReferences;
+            if (dragObjects.Length == 0) {
+                // Debug.Log("No drag objects");
+                return;
+            }
+            
+            var currentWindow = EditorWindow.mouseOverWindow;
+            if (!currentWindow) return;
+            
+            var tabRect = currentWindow.position;
+            tabRect.height = 30;
+            
+            var mousePosition = ReflectionUtility.GetCurrentMousePosition();
+            if (!tabRect.Contains(mousePosition)) {
+                // Debug.Log($"{mousePosition} not in {tabRect}");
+                return;
+            }
+            
+            // Debug.Log($"{tabRect} contains {mousePosition}");
+            var dockArea = ReflectionUtility.GetEditorWindowParent(currentWindow);
 
             EditorApplication.delayCall += () => {
                 for (int i = 0; i < dragObjects.Length; i++) {
                     var assetPath = AssetDatabase.GetAssetPath(dragObjects[i]);
                     if (!string.IsNullOrEmpty(assetPath) && AssetDatabase.IsValidFolder(assetPath)) {
-                        FolderTabWindow.Create(dragObjects[i], _lastWindow);
+                        FolderTabWindow.Create(dragObjects[i], currentWindow);
                         continue;
                     }
 
@@ -108,8 +176,8 @@ namespace Nomnom.AssetTabs {
                 };
             };
 
-            _lastWindow = null;
-
+            if (evt == null) return;
+            
             evt.StopImmediatePropagation();
             evt.StopPropagation();
         }
